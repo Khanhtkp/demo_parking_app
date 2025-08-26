@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Hoan Kiem Parking Map</title>
+  <title>Parking Map</title>
   <meta charset="utf-8" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
@@ -16,21 +16,18 @@
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    const map = L.map('map').setView([21.0285, 105.8542], 15);
+    const map = L.map('map');
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19
     }).addTo(map);
 
-    async function loadRoute() {
-      const response = await fetch('http://127.0.0.1:8000/route?lat=21.02681&lon=105.85762');
+    async function loadRoute(lat, lon) {
+      const response = await fetch(`http://127.0.0.1:8000/route?lat=${lat}&lon=${lon}`);
       const data = await response.json();
 
-      const lat = data.current_location.lat;
-      const lon = data.current_location.lon;
-
       // --- Current location circles ---
-      L.circle([lat, lon], { radius: 5, color: null, fillColor: 'red', fillOpacity: 1 }).addTo(map);
+      L.circle([lat, lon], { radius: 5, fillColor: 'red', fillOpacity: 1 }).addTo(map);
       L.circle([lat, lon], { radius: 10, color: 'red', fillColor: 'red', fillOpacity: 0.2 }).addTo(map);
 
       // --- Parking points ---
@@ -79,12 +76,11 @@
             }, delay);
           });
 
-          // if no markers/polygons, resolve immediately
           if (totalSteps === 0) resolve();
         });
       }
+      await animateParking();
 
-      await animateParking(); // wait until parking is drawn
       // --- Route animation ---
       const routeLatLngs = data.route.map(p => [p.lat, p.lon]);
       const polyline = L.polyline([], { color: 'orange', weight: 4, opacity: 0.8 }).addTo(map);
@@ -100,7 +96,24 @@
       animateRoute();
     }
 
-    loadRoute();
+    // Get actual location from browser
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          map.setView([lat, lon], 16); // center map on user
+          loadRoute(lat, lon);
+        },
+        error => {
+          alert("Could not get your location, using default coordinates.");
+          loadRoute(21.0285, 105.8542);
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by your browser.");
+      loadRoute(21.0285, 105.8542);
+    }
   </script>
 </body>
 </html>
