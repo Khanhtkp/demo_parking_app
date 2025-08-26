@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Hoan Kiem Parking Map</title>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #map { height: 100vh; }
+    .leaflet-marker-icon, .leaflet-interactive {
+      transition: all 0.5s ease-in-out;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([21.0285, 105.8542], 15);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19
+    }).addTo(map);
+
+    async function loadRoute() {
+      const response = await fetch('http://127.0.0.1:8000/route?lat=21.02681&lon=105.85762');
+      const data = await response.json();
+
+      const lat = data.current_location.lat;
+      const lon = data.current_location.lon;
+
+      // --- Current location circles ---
+      L.circle([lat, lon], { radius: 5, color: null, fillColor: 'red', fillOpacity: 1 }).addTo(map);
+      L.circle([lat, lon], { radius: 10, color: 'red', fillColor: 'red', fillOpacity: 0.2 }).addTo(map);
+
+      // --- Parking points ---
+      const parkingMarkers = data.parking_points.map((p, idx) => {
+        const marker = L.circleMarker([p.lat, p.lon], {
+          radius: 0,
+          color: 'blue',
+          fillColor: 'blue',
+          fillOpacity: 0.8
+        }).addTo(map);
+        return { marker, delay: 200 + idx * 50 };
+      });
+
+      // --- Parking polygons ---
+      const parkingPolygons = (data.parking_polygons || []).map((poly, idx) => {
+        const layer = L.polygon(poly.coordinates, {
+          color: 'blue',
+          fillColor: 'blue',
+          fillOpacity: 0.3
+        }).addTo(map);
+        layer.setStyle({ opacity: 0, fillOpacity: 0 });
+        return { layer, delay: 200 + idx * 100 };
+      });
+
+      // Animate parking points/polygons first
+      function animateParking() {
+        return new Promise(resolve => {
+          let totalSteps = parkingMarkers.length + parkingPolygons.length;
+          let done = 0;
+
+          // animate points
+          parkingMarkers.forEach(({ marker, delay }) => {
+            setTimeout(() => {
+              marker.setRadius(5);
+              done++;
+              if (done === totalSteps) resolve();
+            }, delay);
+          });
+
+          // animate polygons
+          parkingPolygons.forEach(({ layer, delay }) => {
+            setTimeout(() => {
+              layer.setStyle({ opacity: 1, fillOpacity: 0.3 });
+              done++;
+              if (done === totalSteps) resolve();
+            }, delay);
+          });
+
+          // if no markers/polygons, resolve immediately
+          if (totalSteps === 0) resolve();
+        });
+      }
+
+      await animateParking(); // wait until parking is drawn
+      // --- Route animation ---
+      const routeLatLngs = data.route.map(p => [p.lat, p.lon]);
+      const polyline = L.polyline([], { color: 'orange', weight: 4, opacity: 0.8 }).addTo(map);
+
+      let i = 0;
+      function animateRoute() {
+        if (i < routeLatLngs.length) {
+          polyline.addLatLng(routeLatLngs[i]);
+          i++;
+          setTimeout(animateRoute, 100);
+        }
+      }
+      animateRoute();
+    }
+
+    loadRoute();
+  </script>
+</body>
+</html>
