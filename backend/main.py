@@ -5,7 +5,9 @@ import osmnx as ox
 from osmnx import geocoder, features, routing
 import networkx as nx
 from shapely.geometry import Point
-import random
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
 
@@ -18,6 +20,8 @@ app.add_middleware(
 
 # Cache graphs for places to avoid rebuilding every request
 graphs = {}
+
+@app.get("/")
 
 @app.get("/route")
 def get_route(lat: float = Query(...), lon: float = Query(...)):

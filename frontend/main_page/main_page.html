@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart Parking App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b1020;
+      --fg: #e8ebf1;
+      --muted: #9aa3b2;
+      --primary: #6cf0a6;
+      --primary-700: #39d785;
+      --card: rgba(255,255,255,0.06);
+      --glass: rgba(255,255,255,0.08);
+      --border: rgba(255,255,255,0.12);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--fg);
+      background: radial-gradient(1200px 700px at 20% -10%, #1a2442 0%, rgba(26,36,66,0) 60%),
+                  radial-gradient(1000px 600px at 120% 10%, #0d6b50 0%, rgba(13,107,80,0) 55%),
+                  linear-gradient(180deg, #0b1020 0%, #0b1020 100%);
+      display: flex; flex-direction: column; min-height: 100vh;
+    }
+    .container { max-width: 980px; margin: 0 auto; padding: 24px; width: 100%; flex: 1; }
+
+    /* Header */
+    .nav {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 12px 16px; border: 1px solid var(--border); border-radius: 16px;
+      background: var(--glass); backdrop-filter: blur(10px);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: 0.2px; }
+    .brand-logo { width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(135deg, #1be58b, #0ea5a3); box-shadow: 0 8px 24px rgba(27,229,139,0.35); }
+    .brand svg { width: 22px; height: 22px; color: #08261c; }
+
+    .badge { font-size: 12px; padding: 8px 12px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); }
+
+    /* Hero */
+    .hero { margin-top: 52px; display: grid; grid-template-columns: 1.1fr 0.9fr; align-items: center; gap: 28px; }
+    .hero-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 28px; padding: 28px; position: relative; overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+    .hero h1 { font-size: clamp(28px, 4vw, 48px); margin: 0 0 12px; line-height: 1.1; }
+    .hero p { margin: 0; color: var(--muted); font-size: clamp(14px, 2.2vw, 18px); }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+    .chip { padding: 8px 12px; border: 1px dashed var(--border); border-radius: 999px; color: var(--fg); font-size: 13px; opacity: 0.9; }
+
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 18px; }
+    .stat { padding: 14px; border-radius: 18px; border: 1px solid var(--border); background: rgba(255,255,255,0.03); text-align: center; }
+    .stat .num { font-weight: 800; font-size: 20px; }
+    .stat .lbl { color: var(--muted); font-size: 12px; }
+
+    /* Illustration */
+    .scene { position: relative; height: 320px; border-radius: 28px; border: 1px solid var(--border); background: rgba(255,255,255,0.03); overflow: hidden; }
+    .grid { position: absolute; inset: 0; background-image: linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px); background-size: 32px 32px; filter: drop-shadow(0 0 8px rgba(0,0,0,0.3)); }
+    .spot { position: absolute; width: 90px; height: 170px; border-radius: 18px; border: 1px solid var(--border); background: rgba(12, 214, 160, 0.08); top: 18px; left: 18px; transform: rotate(-2deg); }
+    .spot:nth-child(2) { left: 130px; top: 40px; transform: rotate(1.5deg); }
+    .spot:nth-child(3) { left: 242px; top: 18px; transform: rotate(-1deg); }
+    .spot:nth-child(4) { left: 354px; top: 38px; transform: rotate(2deg); }
+    .car { position: absolute; width: 46px; height: 24px; background: #9cf1cf; border-radius: 7px; top: 260px; left: -60px; box-shadow: 0 8px 20px rgba(108,240,166,0.35); animation: drive 5s ease-in-out infinite; }
+    .car::before, .car::after { content:""; position:absolute; bottom:-6px; width: 12px; height: 12px; border-radius: 50%; background:#1d2838; }
+    .car::before { left: 6px; }
+    .car::after { right: 6px; }
+    @keyframes drive {
+      0% { transform: translateX(0) translateY(0); }
+      40% { transform: translateX(360px) translateY(-120px); }
+      70% { transform: translateX(260px) translateY(-180px); }
+      100% { transform: translateX(480px) translateY(-180px); }
+    }
+
+    /* Centered Start Button */
+    .footer {
+      display: flex; justify-content: center; align-items: center; padding: 40px 16px;
+    }
+
+    .btn {
+      appearance: none; border: 0; cursor: pointer; padding: 18px 32px; border-radius: 20px;
+      font-weight: 700; font-size: 20px; letter-spacing: 0.3px; color: #0a1c14; background: linear-gradient(135deg, var(--primary), #b9ffd9);
+      box-shadow: 0 12px 30px rgba(108,240,166,0.35), inset 0 1px 0 rgba(255,255,255,0.6);
+      transition: transform .12s ease, box-shadow .12s ease, filter .12s ease; position: relative; overflow: hidden;
+    }
+    .btn:hover { transform: translateY(-2px); filter: saturate(1.05); box-shadow: 0 16px 34px rgba(108,240,166,0.45); }
+    .btn:active { transform: translateY(0); box-shadow: 0 8px 18px rgba(108,240,166,0.3); }
+    .btn .wave { position:absolute; inset: 0; background: radial-gradient(120px 60px at var(--x) var(--y), rgba(255,255,255,0.6), transparent 60%); opacity: 0; transition: opacity .25s ease; }
+    .btn:hover .wave { opacity: 0.35; }
+
+    .toast { position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%); background: #0b1f1a; border: 1px solid var(--border); color: var(--fg); padding: 10px 14px; border-radius: 12px; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(-6px); }
+
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; }
+      .scene { height: 240px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav class="nav">
+      <div class="brand">
+        <div class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M7 4h7.5a5.5 5.5 0 1 1 0 11H11v5H7V4zm4 7h3.5a2.5 2.5 0 0 0 0-5H11v5z"/>
+          </svg>
+        </div>
+        Smart Parking App
+      </div>
+      <span class="badge">Beta</span>
+    </nav>
+
+    <section class="hero">
+      <div class="hero-card">
+        <h1>Find a spot, faster.</h1>
+        <p>Real‑time availability, gentle navigation, and a clean UI designed to get you parked without the hassle.</p>
+        <div class="chips" role="list" aria-label="Highlights">
+          <span class="chip" role="listitem">Live availability</span>
+          <span class="chip" role="listitem">ETA to spot</span>
+          <span class="chip" role="listitem">Price comparison</span>
+          <span class="chip" role="listitem">Secure payments</span>
+        </div>
+        <div class="stats" aria-label="Stats">
+          <div class="stat"><div class="num" aria-hidden="true">12k+</div><div class="lbl">Active spots</div></div>
+          <div class="stat"><div class="num" aria-hidden="true">98%</div><div class="lbl">Accuracy</div></div>
+          <div class="stat"><div class="num" aria-hidden="true"><span aria-hidden="true">&lt;</span>2m</div><div class="lbl">Avg. search time</div></div>
+        </div>
+      </div>
+      <div class="scene hero-card" aria-hidden="true">
+        <div class="grid"></div>
+        <div class="spot"></div>
+        <div class="spot"></div>
+        <div class="spot"></div>
+        <div class="spot"></div>
+        <div class="car"></div>
+      </div>
+    </section>
+  </div>
+
+  <footer class="footer">
+    <button id="startBtn" class="btn" aria-label="Start Smart Parking">
+      <span>Start</span>
+      <span class="wave"></span>
+    </button>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite">Starting… loading map and live spots</div>
+
+  <script>
+    const btn = document.getElementById('startBtn');
+    const wave = btn.querySelector('.wave');
+    btn.addEventListener('pointermove', (e) => {
+      const rect = btn.getBoundingClientRect();
+      const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+      wave.style.setProperty('--x', x + 'px');
+      wave.style.setProperty('--y', y + 'px');
+    });
+
+    const toast = document.getElementById('toast');
+    btn.addEventListener('click', () => {
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+        // window.location.href = '/map.html';
+      }, 1500);
+    });
+  </script>
+</body>
+</html>
