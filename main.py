@@ -94,3 +94,5 @@ def get_route(lat: float = Query(...), lon: float = Query(...)):
         "start": {"lat": lat, "lon": lon},
         "target_parking": chosen_parking_geom.__geo_interface__ if chosen_parking_geom else None
     }
+    
+# To run: uvicorn main:app --reload --host 0.0.0.0 --port 8000
