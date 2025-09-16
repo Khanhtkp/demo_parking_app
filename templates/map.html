@@ -6,12 +6,26 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-ajax/dist/leaflet.ajax.min.js"></script>
+
+  <style>
+    #timer {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.6);
+      color: white;
+      padding: 10px 20px;
+      font-size: 24px;
+      border-radius: 8px;
+      z-index: 1000;
+    }
+  </style>
 </head>
 <body>
-<div id="map" style="height: 100vh;">
-  
-</div>
-<div id="startButtonContainer" 
+  <div id="map" style="height: 100vh;"></div>
+
+  <div id="startButtonContainer"
        style="position: absolute; bottom:20px; left:50%; transform:translateX(-50%); display:none; z-index:1000;">
     <button id="startButton" style="
         padding:20px 30px;
@@ -26,9 +40,8 @@
     </button>
   </div>
 
+  <div id="timer">Time: 0s</div>
 
-<script src="/static/js/my_location.js"></script>
-
-
+  <script src="/static/js/my_location.js"></script>
 </body>
 </html>
