@@ -1,0 +1,12 @@
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+#map {
+  height: 90vh;   /* take 90% of viewport height */
+  width: 100%;    /* full width */
+  margin: auto;
+  display: block; /* center horizontally */
+  border-radius: 10px;
+}
